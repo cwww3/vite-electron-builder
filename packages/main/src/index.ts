@@ -1,4 +1,4 @@
-import {app} from 'electron';
+import {app, dialog, ipcMain, BrowserWindow} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
 
@@ -34,10 +34,23 @@ app.on('activate', restoreOrCreateWindow);
 /**
  * Create the application window when the background process is ready.
  */
+
 app
   .whenReady()
   .then(restoreOrCreateWindow)
+  .then(() => {})
   .catch(e => console.error('Failed create window:', e));
+
+ipcMain.on('openFiles', event => {
+  console.log(event);
+  const files: string[] | undefined = dialog.showOpenDialogSync({
+    properties: ['openDirectory'],
+  });
+  console.log(files);
+  let window = BrowserWindow.getAllWindows();
+  console.log(window);
+  window[0]?.webContents.send('getFiles', files);
+});
 
 /**
  * Install Vue.js or any other extension in development mode only.

@@ -5,6 +5,10 @@ import {join} from 'path';
 import vue from '@vitejs/plugin-vue';
 import {renderer} from 'unplugin-auto-expose';
 
+import {ElementPlusResolver} from 'unplugin-vue-components/resolvers';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+
 const PACKAGE_ROOT = __dirname;
 
 /**
@@ -43,6 +47,12 @@ const config = {
     vue(),
     renderer.vite({
       preloadEntry: join(PACKAGE_ROOT, '../preload/src/index.ts'),
+    }),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
     }),
   ],
 };

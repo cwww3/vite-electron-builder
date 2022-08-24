@@ -2,9 +2,50 @@
 import ReactiveCounter from '/@/components/ReactiveCounter.vue';
 import ReactiveHash from '/@/components/ReactiveHash.vue';
 import ElectronVersions from '/@/components/ElectronVersions.vue';
+// import {test} from '#preload';
+import {reactive, ref, toRefs} from 'vue';
+import {ipcRenderer} from 'electron';
+
+// test()
+const vueFiles = ref([]);
+window.api.getFiles((e: any, files: never[]) => {
+  console.log(e);
+  console.log(files);
+  vueFiles.value = files;
+});
+window.api.openFiles();
+const files = ref([]);
 </script>
 
 <template>
+  <el-row class="mb-4">
+    <el-button plain>Plain</el-button>
+    <el-button
+      type="primary"
+      plain
+      >Primary</el-button
+    >
+    <el-button
+      type="success"
+      plain
+      >Success</el-button
+    >
+    <el-button
+      type="info"
+      plain
+      >Info</el-button
+    >
+    <el-button
+      type="warning"
+      plain
+      >Warning</el-button
+    >
+    <el-button
+      type="danger"
+      plain
+      >Danger</el-button
+    >
+  </el-row>
   <img
     alt="Vue logo"
     src="../assets/logo.svg"
@@ -22,6 +63,7 @@ import ElectronVersions from '/@/components/ElectronVersions.vue';
     </a>
     .
   </p>
+  <p v-for="item in vueFiles">{{ item }}</p>
 
   <fieldset>
     <legend>Test Vue Reactivity</legend>

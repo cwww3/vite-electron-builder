@@ -4,6 +4,7 @@
  * @type {import('vite').UserConfig}
  * @see https://vitest.dev/config/
  */
+
 const config = {
   test: {
     /**
