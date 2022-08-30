@@ -1,104 +1,60 @@
-<script lang="ts" setup>
-import ReactiveCounter from '/@/components/ReactiveCounter.vue';
-import ReactiveHash from '/@/components/ReactiveHash.vue';
-import ElectronVersions from '/@/components/ElectronVersions.vue';
-// import {test} from '#preload';
-import {reactive, ref, toRefs} from 'vue';
-import {ipcRenderer} from 'electron';
-
-// test()
-const vueFiles = ref([]);
-window.api.getFiles((e: any, files: never[]) => {
-  console.log(e);
-  console.log(files);
-  vueFiles.value = files;
-});
-window.api.openFiles();
-const files = ref([]);
-</script>
-
 <template>
-  <el-row class="mb-4">
-    <el-button plain>Plain</el-button>
-    <el-button
-      type="primary"
-      plain
-      >Primary</el-button
-    >
-    <el-button
-      type="success"
-      plain
-      >Success</el-button
-    >
-    <el-button
-      type="info"
-      plain
-      >Info</el-button
-    >
-    <el-button
-      type="warning"
-      plain
-      >Warning</el-button
-    >
-    <el-button
-      type="danger"
-      plain
-      >Danger</el-button
-    >
-  </el-row>
-  <img
-    alt="Vue logo"
-    src="../assets/logo.svg"
-    width="150"
-  />
-
-  <p>
-    For a guide and recipes on how to configure / customize this project,<br />
-    check out the
-    <a
-      href="https://github.com/cawa-93/vite-electron-builder"
-      target="_blank"
-    >
-      vite-electron-builder documentation
-    </a>
-    .
-  </p>
-  <p v-for="item in vueFiles">{{ item }}</p>
-
-  <fieldset>
-    <legend>Test Vue Reactivity</legend>
-    <reactive-counter />
-  </fieldset>
-
-  <fieldset>
-    <legend>Test Node.js API</legend>
-    <reactive-hash />
-  </fieldset>
-
-  <fieldset>
-    <legend>Environment</legend>
-    <electron-versions />
-  </fieldset>
-
-  <p>
-    Edit
-    <code>packages/renderer/src/App.vue</code> to test hot module replacement.
-  </p>
+  <el-container>
+    <el-aside width="200px">
+      <router-link to="/">Home</router-link>
+      <mTree :root="rootState"></mTree>
+    </el-aside>
+    <el-main>
+      <router-view :key="router.currentRoute.value.fullPath" />
+    </el-main>
+  </el-container>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin: 60px auto;
-  max-width: 700px;
-}
+<script lang="ts" setup>
+import {reactive, ref, toRefs} from 'vue';
+import {Tree} from '/@/t';
+import {useRouter, useRoute, RouteRecordName} from 'vue-router';
+import {getRouterTree, getTree} from '/@/utils/index';
+import bus from 'vue3-eventbus';
+import {it} from 'node:test';
+const router = useRouter();
 
-fieldset {
-  margin: 2rem;
-  padding: 1rem;
+let rootState = ref({} as Tree);
+window.api.getTreeFiles((e: any, root: Tree) => {
+  router.getRoutes().forEach(route => {
+    if (route.name !== 'Home') {
+      router.removeRoute(route.name as RouteRecordName);
+    }
+  });
+  let rs = getRouterTree(root, true);
+  rs.forEach(r => {
+    router.addRoute(r);
+  });
+  router.push(router.getRoutes()[0]);
+  getTree(root, false);
+  rootState.value = root;
+  // await router.replace(router.currentRoute.value.fullPath);
+  console.log(rootState.value);
+});
+
+// listen to an event
+bus.on('changeShow', (name: string) => {
+  console.log('changeShow', name);
+  changeShow(rootState.value, name);
+});
+const changeShow = function (root: Tree, name: string) {
+  if (root.name && root.name === name) {
+    root.isShow = !root.isShow;
+    return;
+  }
+  root.children.forEach(item => {
+    changeShow(item, name);
+  });
+};
+</script>
+
+<style>
+.router-link-active {
+  text-decoration: none;
 }
 </style>

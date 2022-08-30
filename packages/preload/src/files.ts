@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer,IpcRendererEvent }  from 'electron';
+import {contextBridge, ipcRenderer, IpcRendererEvent} from 'electron';
 
 // export function test() {
 //   console.log(contextBridge)
@@ -12,11 +12,15 @@ import { contextBridge, ipcRenderer,IpcRendererEvent }  from 'electron';
 //   }
 // )
 
-
-contextBridge.exposeInMainWorld(
-  'api',
-  {
-    openFiles: () => ipcRenderer.send('openFiles'),
-    getFiles: (callback :(event: IpcRendererEvent, ...args: any[]) => void) => ipcRenderer.on('getFiles',callback)
-  }
-)
+contextBridge.exposeInMainWorld('api', {
+  getTreeFiles: (callback: (event: IpcRendererEvent, ...args: any[]) => void) => {
+    ipcRenderer.on('getTreeFiles', callback);
+  },
+  getFileDetail: async (
+    path: string,
+    callback: (event: IpcRendererEvent, ...args: any[]) => void,
+  ) => {
+    ipcRenderer.on('getFileDetail', callback);
+    ipcRenderer.send('onGetFileDetail', path);
+  },
+});
